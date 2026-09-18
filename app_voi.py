@@ -388,6 +388,48 @@ else:
     cluster_map = pd.DataFrame()
 
 
+####### Create relocation zone circles
+
+def create_circle_points(lat, lon, radius_m, points=64):
+
+    angles = np.linspace(
+        0,
+        2 * np.pi,
+        points,
+        endpoint=False
+    )
+
+    lat_offset = radius_m / 111320
+
+    lon_offset = radius_m / (
+        111320 * np.cos(np.radians(lat))
+    )
+
+    circle = [
+        [
+            lon + lon_offset * np.cos(angle),
+            lat + lat_offset * np.sin(angle)
+        ]
+        for angle in angles
+    ]
+
+    circle.append(circle[0])
+
+    return circle
+
+
+if not cluster_map.empty:
+
+    cluster_map["circle_path"] = cluster_map.apply(
+        lambda row: create_circle_points(
+            row["center_lat"],
+            row["center_lon"],
+            cluster_radius_m
+        ),
+        axis=1
+    )
+
+
 ####### Scooter layers
 
 idle_scooters_layer = pdk.Layer(
@@ -441,15 +483,12 @@ map_layers.append(candidate_layer)
 if not cluster_map.empty:
 
     cluster_zone_layer = pdk.Layer(
-        "ScatterplotLayer",
+        "PathLayer",
         data=cluster_map,
-        get_position="[center_lon, center_lat]",
-        get_radius=40,
-        radius_units="meters",
-        filled=False,
-        stroked=True,
-        get_line_color=[180, 45, 40, 255],
-        line_width_min_pixels=3,
+        get_path="circle_path",
+        get_color=[190, 45, 40, 255],
+        get_width=3,
+        width_min_pixels=3,
         pickable=True
     )
 
