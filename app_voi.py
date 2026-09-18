@@ -388,12 +388,34 @@ else:
     cluster_map = pd.DataFrame()
 
 
-####### Map layers
+####### Scooter layers
 
-map_layers = []
+idle_scooters_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=idle_map,
+    get_position="[lon, lat]",
+    get_radius=10,
+    get_fill_color=[95, 95, 95, 150],
+    pickable=False,
+    radius_min_pixels=1,
+    radius_max_pixels=3
+)
+
+candidate_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=candidate_map,
+    get_position="[lon, lat]",
+    get_radius=16,
+    get_fill_color=[190, 65, 55, 220],
+    pickable=False,
+    radius_min_pixels=2,
+    radius_max_pixels=5
+)
 
 
 ####### Service area
+
+map_layers = []
 
 if service_area is not None:
 
@@ -410,6 +432,10 @@ if service_area is not None:
     map_layers.append(service_area_layer)
 
 
+map_layers.append(idle_scooters_layer)
+map_layers.append(candidate_layer)
+
+
 ####### Relocation zones
 
 if not cluster_map.empty:
@@ -422,46 +448,12 @@ if not cluster_map.empty:
         radius_units="meters",
         filled=False,
         stroked=True,
-        get_line_color=[180, 45, 40, 220],
-        line_width_min_pixels=2,
+        get_line_color=[180, 45, 40, 255],
+        line_width_min_pixels=3,
         pickable=True
     )
 
     map_layers.append(cluster_zone_layer)
-
-
-####### Idle scooters
-
-idle_scooters_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=idle_map,
-    get_position="[lon, lat]",
-    get_radius=10,
-    radius_units="meters",
-    get_fill_color=[95, 95, 95, 150],
-    pickable=False,
-    radius_min_pixels=1,
-    radius_max_pixels=3
-)
-
-map_layers.append(idle_scooters_layer)
-
-
-####### Relocation candidates
-
-candidate_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=candidate_map,
-    get_position="[lon, lat]",
-    get_radius=16,
-    radius_units="meters",
-    get_fill_color=[190, 65, 55, 220],
-    pickable=False,
-    radius_min_pixels=2,
-    radius_max_pixels=5
-)
-
-map_layers.append(candidate_layer)
 
 
 ####### Map view
