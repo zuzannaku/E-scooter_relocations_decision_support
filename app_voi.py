@@ -4,7 +4,6 @@ import numpy as np
 import joblib
 import pydeck as pdk
 import json
-import json
 import geopandas as gpd
 
 from pathlib import Path
@@ -17,6 +16,7 @@ st.set_page_config(
     page_title="E-Scooter Relocation Decision Support",
     layout="wide"
 )
+
 
 ####### File paths
 
@@ -67,11 +67,13 @@ def load_service_area():
 
     return json.loads(gdf.to_json())
 
+
 ####### Load files
 
 model, model_features = load_model()
 df = load_data()
 service_area = load_service_area()
+
 
 ####### Header
 
@@ -187,7 +189,7 @@ relocation_candidates = snapshot[
 ].copy()
 
 
-####### Metrics for summary tavle
+####### Metrics for summary table
 
 metric1, metric2, metric3, metric4 = st.columns(4)
 
@@ -386,34 +388,12 @@ else:
     cluster_map = pd.DataFrame()
 
 
-####### Scooter layers
+####### Map layers
 
-idle_scooters_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=idle_map,
-    get_position="[lon, lat]",
-    get_radius=10,
-    get_fill_color=[95, 95, 95, 150],
-    pickable=False,
-    radius_min_pixels=1,
-    radius_max_pixels=3
-)
-
-candidate_layer = pdk.Layer(
-    "ScatterplotLayer",
-    data=candidate_map,
-    get_position="[lon, lat]",
-    get_radius=16,
-    get_fill_color=[190, 65, 55, 220],
-    pickable=False,
-    radius_min_pixels=2,
-    radius_max_pixels=5
-)
+map_layers = []
 
 
 ####### Service area
-
-map_layers = []
 
 if service_area is not None:
 
@@ -429,9 +409,6 @@ if service_area is not None:
 
     map_layers.append(service_area_layer)
 
-map_layers.append(idle_scooters_layer)
-map_layers.append(candidate_layer)
-
 
 ####### Relocation zones
 
@@ -443,15 +420,48 @@ if not cluster_map.empty:
         get_position="[center_lon, center_lat]",
         get_radius=40,
         radius_units="meters",
-        filled=True,
+        filled=False,
         stroked=True,
-        get_fill_color=[210, 65, 55, 25],
-        get_line_color=[180, 45, 40, 170],
-        line_width_min_pixels=1,
+        get_line_color=[180, 45, 40, 220],
+        line_width_min_pixels=2,
         pickable=True
     )
 
     map_layers.append(cluster_zone_layer)
+
+
+####### Idle scooters
+
+idle_scooters_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=idle_map,
+    get_position="[lon, lat]",
+    get_radius=10,
+    radius_units="meters",
+    get_fill_color=[95, 95, 95, 150],
+    pickable=False,
+    radius_min_pixels=1,
+    radius_max_pixels=3
+)
+
+map_layers.append(idle_scooters_layer)
+
+
+####### Relocation candidates
+
+candidate_layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=candidate_map,
+    get_position="[lon, lat]",
+    get_radius=16,
+    radius_units="meters",
+    get_fill_color=[190, 65, 55, 220],
+    pickable=False,
+    radius_min_pixels=2,
+    radius_max_pixels=5
+)
+
+map_layers.append(candidate_layer)
 
 
 ####### Map view
