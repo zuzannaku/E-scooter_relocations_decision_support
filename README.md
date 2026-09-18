@@ -17,4 +17,6 @@ ML task and pipeline design:
 Data source: 
 - scooters: https://zenodo.org/records/16947276
 - weather API: https://open-meteo.com/en/docs/historical-weather-api
+
+  
 (repository does not include the raw idling and trip datasets because if their too big size)
